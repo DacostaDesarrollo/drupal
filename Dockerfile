@@ -1,10 +1,7 @@
 FROM drupal:10.2.0-php8.2-fpm
 
-# Actualizar paquetes y caché de apt
-RUN apt-get update
-
-# Instalar dependencias necesarias
-RUN apt-get install -y \
+# Actualizar paquetes y caché de apt e instalar dependencias necesarias en un solo RUN
+RUN apt-get update && apt-get install -y \
     git \
     unzip \
     curl \
@@ -16,8 +13,9 @@ RUN apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     mariadb-client \
+    libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd iconv mbstring pdo_mysql zip intl
+    && docker-php-ext-install -j$(nproc) gd iconv mbstring pdo_mysql zip intl dom
 
 # Limpiar caché de apt para reducir el tamaño de la imagen
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -30,8 +28,6 @@ RUN composer global require drush/drush
 
 # Establecer permisos
 RUN chown -R www-data:www-data /var/www/html
-
-
 
 # Definir directorio de trabajo
 WORKDIR /var/www/html
